@@ -1,5 +1,5 @@
 {
-    "name": "runtime-context",
+    "name": "@environment-safe/runtime-context",
     "version": "0.0.1",
     "type": "module",
     "main": "dist/index.mjs",
@@ -23,17 +23,17 @@
             "require": "./dist/index.cjs"
         }
     },
-    "homepage": "null",
-    "description": "null",
+    "homepage": "https://github.com/environment-safe/runtime-context",
+    "description": "vanilla, browser compatible es module to reveal the executing context",
     "keywords": [],
-    "author": "null <null>()",
+    "author": "Abbey Hawk Sparrow <@khrome> (http://patternweaver.com)",
     "contributors": [],
     "repository": {
         "type": "git",
-        "url": "null"
+        "url": "git@github.com:environment-safe/runtime-context.git"
     },
     "bugs": {
-        "url": "null"
+        "url": "https://github.com/environment-safe/runtime-context/issues"
     },
     "moka": {
         "firefox": {
@@ -73,7 +73,7 @@
         "@environment-safe/chai": "^0.1.0",
         "@environment-safe/commonjs-builder": "^0.0.3",
         "@environment-safe/jsdoc-builder": "^0.0.2",
-        "@open-automaton/moka": "^0.0.4",
+        "@open-automaton/moka": "^0.1.0",
         "babel-plugin-search-and-replace": "^1.1.1",
         "babel-plugin-transform-import-meta": "^2.2.0",
         "chai": "^4.3.7",
