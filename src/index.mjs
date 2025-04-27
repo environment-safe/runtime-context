@@ -16,17 +16,47 @@ const ensureRequire = ()=> (!internalRequire) && (internalRequire = mod.createRe
 //todo: detect Rhino
 import { isBrowser, isNode, isWebWorker, isJsDom, isDeno } from 'browser-or-node';
 export { isBrowser, isNode, isWebWorker, isJsDom, isDeno };
-export const variables = (isBrowser || isJsDom)?window:global;
+export const isElectronRenderer = (
+    ( isBrowser || isJsDom ) && 
+    typeof window !== 'undefined' && 
+    typeof window.process === 'object' && 
+    window.process.type === 'renderer'
+)?true:false;
+        
+export const isElectronMain = (
+    typeof process !== 'undefined' && 
+    typeof process.versions === 'object' && 
+    !!process.versions.electron
+)?true:false;
+    
+export const isElectronBrowser = (
+    typeof navigator === 'object' && 
+    typeof navigator.userAgent === 'string' && 
+    navigator.userAgent.indexOf('Electron') >= 0
+)?true:false;
+
+export const isHeadlessElectron = 
+isElectronRenderer ||
+isElectronMain;
+
+export const isElectron = 
+    isElectronRenderer ||
+    isElectronMain ||
+    isElectronBrowser;
+    
+const hasHead = ((isBrowser || isJsDom) && !isHeadlessElectron);
+
+export const variables = hasHead?window:global;
 export const isBun = !!(variables.Bun && variables.Bun.serve && variables.Bun.file);
-export const isLocalFileRoot = (isBrowser || isJsDom) && variables.location && variables.location.protocol === 'file:';
-export const isUrlRoot = (isBrowser || isJsDom) && variables.location && (
+export const isLocalFileRoot = hasHead && variables.location && variables.location.protocol === 'file:';
+export const isUrlRoot = hasHead && variables.location && (
     variables.location.protocol === 'http:' || variables.location.protocol === 'https:'
 );
-export const isFtpRoot = (isBrowser || isJsDom) && variables.location && variables.location.protocol === 'ftp:';
+export const isFtpRoot = hasHead && variables.location && variables.location.protocol === 'ftp:';
 export const isServerRoot = !(isLocalFileRoot || isUrlRoot);
 
-export const isClient = isBrowser || isJsDom;
-export const isServer = isNode || isBun || isDeno;
+export const isClient = hasHead;
+export const isServer = isNode || isBun || isDeno || isElectronMain;
 
 // BEGIN detect-browser code (ported here for vanilla compatibility)
 // logic is currently black-boxed
@@ -36,6 +66,8 @@ export const isServer = isNode || isBun || isDeno;
 class BrowserInfo{
     constructor( name, version, os ){
         this.type = 'browser';
+        this.name = name;
+        this.version = os;
     }
 }
 
@@ -72,6 +104,15 @@ class ReactNativeInfo{
     }
 }
 
+class ElectronInfo{
+    constructor(){
+        this.type = 'electron';
+        this.name = 'electron';
+        this.version = null;
+        this.os = null;
+    }
+}
+
 /* eslint-disable no-useless-escape */
 const SEARCHBOX_UA_REGEX = /alexa|bot|crawl(er|ing)|facebookexternalhit|feedburner|google web preview|nagios|postrank|pingdom|slurp|spider|yahoo!|yandex/;
 const SEARCHBOT_OS_REGEX = /(nuhk|curl|Googlebot|Yammybot|Openbot|Slurp|MSNBot|Ask\ Jeeves\/Teoma|ia_archiver)/;
@@ -98,6 +139,7 @@ const userAgentRules = [
         'chromium-webview',
         /(?!Chrom.*OPR)wv\).*Chrom(?:e|ium)\/([0-9\.]+)(:?\s|$)/,
     ],
+    ['nodejs', /Node\.js/],
     ['chrome', /(?!Chrom.*OPR)Chrom(?:e|ium)\/([0-9\.]+)(:?\s|$)/],
     ['phantomjs', /PhantomJS\/([0-9\.]+)(:?\s|$)/],
     ['crios', /CriOS\/([0-9\.]+)(:?\s|$)/],
@@ -164,6 +206,9 @@ function detect(userAgent){
     ){
         return new ReactNativeInfo();
     }
+    if(isElectronBrowser){
+        return new ElectronInfo();
+    }
     if(typeof navigator !== 'undefined') return parseUserAgent(navigator.userAgent);
     return getNodeVersion();
 }
@@ -213,6 +258,9 @@ function parseUserAgent(ua){
     if (searchBotMatch && searchBotMatch[1]) {
         return new SearchBotDeviceInfo(name, version, os, searchBotMatch[1]);
     }
+    if(isElectronMain){
+        return new ElectronInfo();
+    }
     return new BrowserInfo(name, version, os);
 }
 
@@ -261,6 +309,8 @@ const simplifyOSMap = {
     'Windows 10': 'windows',
     'Windows Mobile': 'windows-mobile',
     'Windows CE': 'windows-embedded',
+    'Mac OS X': 'macosx',
+    'BlackBerry OS': 'blackberryos'
 };
 const simplifyOSName = (name)=>{
     if(simplifyOSMap[name.toLowerCase()]) return simplifyOSMap[name.toLowerCase()];
@@ -268,10 +318,10 @@ const simplifyOSName = (name)=>{
 };
 const agent = (variables.navigator && variables.navigator.userAgent) || null;
 const detected = detect(agent);
-export const runtime = detected.type === 'browser'?browserName(agent):(
+export const runtime = (detected && detected.type === 'browser')?browserName(agent):(
     //now check if we're in an alternate runtime (non-browser)
     isDeno?'deno':(
-        isBun?'bun':( detected.type )
+        isBun?'bun':( detected && detected.type )
     )
 );
 export const raw = detected;

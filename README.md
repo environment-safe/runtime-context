@@ -1,12 +1,12 @@
-runtime-context
-============================
-There are situations where browser support and server support never even *tried* getting on the same page.  (ex: consider that URL paths all use unix separators, while `file:` urls use platform specific paths and node.js URLs uses both `file:` paths (but with a different interaction pattern) and native paths. In addition most of the places you have access to poll are standard locations which are the same from platform to platform.
+@environment-safe/runtime-context
+=================================
+There are situations where browser support and server support never even *tried* getting on the same page. ex: consider that URL paths all use unix separators, while `file:` urls use platform specific paths and node.js URLs uses both `file:` paths (but with a different interaction pattern) and native paths. In addition most of the places you have access to poll are standard locations which are the same from platform to platform.
 
 Essentially the standards bodies invent something new every time the problem appears.
 
 Imagine how much simpler node would have been with all posix paths and virtual locations for platform specific weirdness?
 
-In these situations you need specific detail about what the running scenario is. That's what this module does. In addition it fixes some logic to make server and client OS detection symmetrical and augments the `detect-browser` code (Ex: it detects no less than 13 versions of windows yet cannot differentiate linuxes or even identify MacOS).
+In these situations you need specific detail about what the running scenario is. That's what this module does. In addition it fixes some logic to make server and client OS detection symmetrical and augments the `detect-browser` code (It now detects a wide array of operating systems).
 
 Usage
 -----
@@ -16,6 +16,10 @@ import {
     isBrowser, 
     isNode, 
     isWebWorker, 
+    isElectron, 
+    isElectronRenderer,
+    isElectronMain,
+    isElectronBrowser,
     isJsDom, 
     isDeno,
     isBun,
