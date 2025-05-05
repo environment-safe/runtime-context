@@ -44,7 +44,7 @@ export const isElectron =
     isElectronMain ||
     isElectronBrowser;
     
-const hasHead = ((isBrowser || isJsDom) && !isHeadlessElectron);
+export const hasHead = ((isBrowser || isJsDom) && !isHeadlessElectron);
 
 export const variables = hasHead?window:global;
 export const isBun = !!(variables.Bun && variables.Bun.serve && variables.Bun.file);

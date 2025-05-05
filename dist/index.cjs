@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.flavor = void 0;
+exports.hasHead = exports.flavor = void 0;
 Object.defineProperty(exports, "isBrowser", {
   enumerable: true,
   get: function () {
@@ -68,6 +68,7 @@ exports.isHeadlessElectron = isHeadlessElectron;
 const isElectron = isElectronRenderer || isElectronMain || isElectronBrowser;
 exports.isElectron = isElectron;
 const hasHead = (_browserOrNode.isBrowser || _browserOrNode.isJsDom) && !isHeadlessElectron;
+exports.hasHead = hasHead;
 const variables = hasHead ? window : global;
 exports.variables = variables;
 const isBun = !!(variables.Bun && variables.Bun.serve && variables.Bun.file);
